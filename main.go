@@ -1,6 +1,8 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -10,10 +12,18 @@ import (
 )
 
 func main() {
-	if len(os.Args) < 3 {
-		log.Fatal("usage: s4cat <bucket> <key>")
+	var (
+		output string
+	)
+	flag.StringVar(&output, "output", "/dev/stdout", "Place to send the output")
+	flag.Parse()
+
+	if flag.NArg() != 2 {
+		fmt.Fprintf(os.Stderr, "Usage: %s [-output=FILEPATH] <bucket> <key>\n", os.Args[0])
+		flag.PrintDefaults()
+		os.Exit(1)
 	}
-	bucket, key := os.Args[1], os.Args[2]
+	bucket, key := flag.Arg(0), flag.Arg(1)
 
 	creds := aws.IAMCreds()
 
@@ -25,7 +35,12 @@ func main() {
 	if err != nil {
 		log.Fatalf("GetObject Failed: %#+v", err)
 	}
-	n, err := io.Copy(os.Stdout, resp.Body)
+	fd, err := os.Create(output)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer fd.Close()
+	n, err := io.Copy(fd, resp.Body)
 	if err != nil {
 		log.Fatal("Copy failed after", n, "bytes:", err)
 	}
