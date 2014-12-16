@@ -1,6 +1,3 @@
-// Note: doesn't work yet.
-// Note: you may wish to modify the hard-coded region from eu-west-1.
-
 package main
 
 import (
