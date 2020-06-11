@@ -7,8 +7,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/stripe/aws-go/aws"
-	"github.com/stripe/aws-go/gen/s3"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 )
 
 func main() {
@@ -25,10 +26,14 @@ func main() {
 	}
 	bucket, key := flag.Arg(0), flag.Arg(1)
 
-	creds := aws.IAMCreds()
+	s := session.Must(session.NewSession())
 
-	s := s3.New(creds, "eu-west-1", nil)
-	resp, err := s.GetObject(&s3.GetObjectRequest{
+	region := "eu-west-1"
+	svc := s3.New(s, &aws.Config{
+		Region: &region,
+	})
+
+	resp, err := svc.GetObject(&s3.GetObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(key),
 	})
