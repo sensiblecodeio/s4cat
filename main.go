@@ -1,15 +1,16 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"io"
 	"log"
 	"os"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
 func main() {
@@ -26,14 +27,14 @@ func main() {
 	}
 	bucket, key := flag.Arg(0), flag.Arg(1)
 
-	s := session.Must(session.NewSession())
+	cfg, err := config.LoadDefaultConfig(context.Background())
+	if err != nil {
+		log.Fatalf("s4cat: unable to load config: %v", err)
+	}
+	cfg.Region = "eu-west-1"
+	svc := s3.NewFromConfig(cfg)
 
-	region := "eu-west-1"
-	svc := s3.New(s, &aws.Config{
-		Region: &region,
-	})
-
-	resp, err := svc.GetObject(&s3.GetObjectInput{
+	resp, err := svc.GetObject(context.Background(), &s3.GetObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(key),
 	})
