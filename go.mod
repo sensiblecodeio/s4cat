@@ -1,6 +1,6 @@
 module github.com/sensiblecodeio/s4cat
 
-go 1.23.1
+go 1.24.2
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.36.3
